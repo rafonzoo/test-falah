@@ -6,22 +6,48 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "cross-env ANALYZE=true npm run build",
+    "format": "prettier **.{ts,tsx} --write --config ./.prettierrc.json",
+    "story:start": "sb dev",
+    "story:build": "sb build",
+    "test:e2e": "npx playwright test",
+    "test:vitest": "npx vitest"
   },
   "dependencies": {
+    "@next/bundle-analyzer": "^15.2.3",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-slot": "^1.1.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.483.0",
+    "next": "15.2.3",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.2.3"
+    "react-icons": "^5.5.0",
+    "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.0.2",
+    "tw-animate-css": "^1.2.4"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.51.1",
+    "@storybook/nextjs": "^8.6.9",
+    "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
-    "@eslint/eslintrc": "^3"
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^3.0.9"
   }
 }
