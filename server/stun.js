@@ -1,15 +1,15 @@
-const Turn = require('node-turn');
+const Turn = require('node-turn')
 
 const server = new Turn({
   listeningPort: 3478, // Port default for STUN/TURN
   authMech: 'long-term',
-  debugLevel: "ALL",
+  debugLevel: 'ALL',
   credentials: {
-    user1: "password123",
-    user2: "securepass"
+    user1: 'password123',
+    user2: 'securepass',
   },
-});
+})
 
-server.start();
+server.start()
 
-console.log("TURN server running on port 3478...");
+console.log('TURN server running on port 3478...')

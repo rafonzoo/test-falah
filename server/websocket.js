@@ -3,23 +3,25 @@ const { createServer } = require("node:http");
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
-const cors = require("cors");
 
-const config = { port: process.env.PORT || 5000, jwtsecret: "kitakesana" };
+const config = { port: process.env.PORT || 3001, jwtsecret: "kitakesana" };
 const app = express();
 const httpServer = createServer(app);
+const cors = require("cors");
 
 app.use(cors({ origin: ["http://localhost:5173"] }));
 app.use(bodyParser.json());
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:3000", "http://localhost:5173"],
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
 const usersInRooms = {}; // Saved here
+const messages = {};
 
 const authToken = (token) => jwt.verify(token, config.jwtsecret);
 
@@ -31,7 +33,7 @@ app.post("/api/v1/auth/login", (req, res) => {
 
 io.on("connection", (socket) => {
   try {
-    const token = socket.request.headers.authorization.split(" ")[1];
+    const token = socket.handshake.auth?.token;
     const auth = authToken(token);
 
     socket.join(auth.room);
@@ -40,24 +42,21 @@ io.on("connection", (socket) => {
     usersInRooms[auth.room][auth.name] = { online: true, socketId: socket.id };
 
     io.to(auth.room).emit("roomUsers", usersInRooms[auth.room]);
+    io.to(auth.room).emit("message", messages[auth.room] ?? []);
 
-    /** WebRTC Signaling */
-    socket.on("offer", (offer) => {
-      socket.to(auth.room).emit("offer", { name: auth.name, offer });
-    });
+    // Web RTC
+    socket.on('hangup', () => io.to(auth.room).emit('hangup'));
+    socket.on('cancel', (data) => socket.to(auth.room).emit('cancel', data));
+    socket.on('accept', (data) => socket.to(auth.room).emit('accept', data));
+    socket.on('signal', (data) => socket.to(auth.room).emit('signal', data));
+    socket.on('ask', (data) => socket.to(auth.room).emit('ask', data));
+    socket.on('offer', (data) => socket.to(auth.room).emit('offer', data));
+    socket.on('answer', (data) => socket.to(auth.room).emit('answer', data));
 
-    socket.on("answer", (answer) => {
-      socket.to(auth.room).emit("answer", { name: auth.name, answer });
-    });
-
-    socket.on("ice-candidate", (candidate) => {
-      socket.to(auth.room).emit("ice-candidate", { name: auth.name, candidate });
-    });
-
-    /** Chat */
     socket.on("message", (message) => {
       const payload = { name: auth.name, content: message.content };
-      socket.to(auth.room).emit("message", payload);
+      messages[auth.room] = [...(messages[auth.room] ?? []), payload];
+      socket.to(auth.room).emit("message", messages[auth.room]);
     });
 
     socket.on("disconnect", () => {
